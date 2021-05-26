@@ -1,0 +1,13 @@
+version: "3"
+services:
+  tests: 
+    image: rdfairmetrics/fair_metric_tests:0.0.1
+    container_name: rd-tests
+    environment:
+      TEST_PROTOCOL: ${PROTOCOL}
+      TEST_HOST: ${HOST} # from the perspective of the evaluator container!
+      TEST_PATH: ${PATH}     # becomes http://tests:8080/tests/blahbahblah
+    ports:
+      - "8080:8080"
+
+

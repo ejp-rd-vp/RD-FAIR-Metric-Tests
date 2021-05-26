@@ -25,7 +25,7 @@ RUN gem install rdf-trig rdf-raptor xml-simple parseconfig json rdf-json json-ld
 RUN mkdir /TESTS
 RUN mkdir /TESTS/tests
 WORKDIR /TESTS/tests
-COPY ./TESTS/gen2* /TESTS/tests/
+COPY ./TESTS/rd* /TESTS/tests/
 COPY ./TESTS/fair_metrics_utilities.rb /TESTS/tests/
 COPY ./TESTS/config.conf /TESTS/tests/
 COPY ./TESTS/env.sh /TESTS/tests/
