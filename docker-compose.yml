@@ -7,6 +7,8 @@ services:
       TEST_PROTOCOL: ${PROTOCOL}
       TEST_HOST: ${HOST} # from the perspective of the evaluator container!
       TEST_PATH: ${PATH}     # becomes http://tests:8080/tests/blahbahblah
+      FAIRSHARING_KEY: ${FAIRSHARING_KEY}
+      BING_API: ${BING_API}
     ports:
       - "8080:8080"
 
