@@ -83,7 +83,7 @@ schemas = {'subject' => ['string', "the GUID being tested"]}
 @swagger = Swagger.new({
 			:title => "FAIR Metrics Domain Specific - RD-R1 Metadata contains ORDO and HPO terms",
 			:description => "A domain-specific test for metadata describing records in the Rare Disease domain.  It tests if the metadata contains annotations conforming to the Human Phenotype Ontology URLs or the Orphanet Rare Disease Ontology URLs.  One or more of either of these annotations, as the object of any triple, will be sufficient to pass the test.",
-			:tests_metric => 'https://raw.githubusercontent.com/LUMC-BioSemantics/RD-FAIRmetrics/main/R1.nq',
+			:tests_metric => 'https://w3id.org/rd-fairmetrics/RD-R1',
 			:version => VERSION,
 			:applies_to_principle => "R1",
 			:organization => 'EJP-RD & ELIXIR Metrics for Rare Disease',
