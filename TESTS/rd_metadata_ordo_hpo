@@ -1,0 +1,114 @@
+#!/home/mark_moby_wilkinson/.rvm/rubies/ruby-2.5.1/bin/ruby
+require_relative 'fair_metrics_utilities'
+require 'cgi'
+require 'json'
+require 'uri'
+require 'rdf'
+require 'rdf/turtle'
+require 'sparql'
+
+debug = false
+VERSION = HARVESTER_VERSION + ":" + "RD-R1-Tst-0.0.1"
+
+
+def testGUID
+
+	@swagger.addComment("INFO: TEST VERSION '#{VERSION}'\n")
+	
+	
+	guid = @swagger.testedGUID
+	
+	metadata = Utils::resolveit(guid)  # this is where the magic happens!
+
+	metadata.comments.each do |c|
+		@swagger.addComment(c)
+	end
+	@swagger.score = 0
+	
+	
+	if metadata.guidtype == "unknown"
+		@swagger.addComment("FAILURE: The identifier #{guid} did not match any known identification system.\n")
+		return @swagger.createEvaluationResponse
+	end
+	
+	g = metadata.graph
+	if @swagger.debug
+		g.each {|s| $stderr.puts s.subject.to_s + "\tPRED: " + s.predicate.to_s + "\tOBJ: " + s.object.to_s + "\n"}
+	end
+	
+	if g.size > 0  # have we found anything yet?
+		@swagger.addComment("INFO: Linked data was found.\n")
+	else
+		@swagger.addComment("FAILURE: No linked data was found.  Test is exiting.\n")
+		@swagger.score = 0
+		return @swagger.createEvaluationResponse
+	end
+
+	success = 0  # we will accept 5/10 failures
+	g.each do |stm|
+		success += 1 if stm.object.is_a?(RDF::URI) and stm.object.to_s =~ /http:\/\/www.orpha.net\/ORDO\//
+		success += 1 if stm.object.is_a?(RDF::URI) and stm.object.to_s =~ /http:\/\/purl.obolibrary.org\/obo\/HP_/
+	end
+	
+	if success >= 1   # this is a very weak test!
+		@swagger.addComment("SUCCESS: A HPO or ORDO Resource was found in the metadata record.")
+		@swagger.score = 1
+	else
+		@swagger.addComment("FAILURE: No HPO or ORDO Resources were found in the metadata record.  Searched only non-literal Objects in RDF Triples, matched the String of that Object URL against http://www.orpha.net/ORDO/ and http://purl.obolibrary.org/obo/HP_")
+		@swagger.score = 0		
+	end
+	
+	return @swagger.createEvaluationResponse
+end
+
+
+if debug
+#	@input = '{"subject": "10.5281/zenodo.1147435"}'  # doi fail
+#	@input = '{"subject": "10.5281/zenodo.1065973"}'  # doi fail
+#	@input = '{"subject": "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"}' # inchi
+#	@input = '{"subject": "LFQSCWFLJHTTHZ-UHFFFAOYSA-N"}' # another inchi
+#	@input = '{"subject": "20.1000/105"}'  # handle (fail)
+	@input = '{"subject": "http://fdp.duchennedatafoundation.org:8080/dataset/d877ac76-87ba-461f-803b-3a8a90a2e965"}'  # handle
+
+else 
+	@input = $stdin.read
+end
+
+
+
+cgi = CGI.new
+
+schemas = {'subject' => ['string', "the GUID being tested"]}
+
+@swagger = Swagger.new({
+			:title => "FAIR Metrics Domain Specific - RD-R1 Metadata contains ORDO and HPO terms",
+			:description => "A domain-specific test for metadata describing records in the Rare Disease domain.  It tests if the metadata contains annotations conforming to the Human Phenotype Ontology URLs or the Orphanet Rare Disease Ontology URLs.  One or more of either of these annotations, as the object of any triple, will be sufficient to pass the test.",
+			:tests_metric => 'https://raw.githubusercontent.com/LUMC-BioSemantics/RD-FAIRmetrics/main/R1.nq',
+			:version => VERSION,
+			:applies_to_principle => "R1",
+			:organization => 'EJP-RD & ELIXIR Metrics for Rare Disease',
+			:org_url => 'https://github.com/LUMC-BioSemantics/RD-FAIRmetrics',
+			:responsible_developer => "Mark D Wilkinson",
+			:email => 'markw@illuminae.com',
+			:developer_ORCiD => '0000-0001-6960-357X',
+			:protocol => ENV['TEST_PROTOCOL'],
+			:host => ENV['TEST_HOST'],
+			:basePath => ENV['TEST_PATH'],
+			:path => 'rd_metadata_ordo_hpo',
+			:response_description => 'The response is a binary (1/0), success or failure',
+			:schemas => schemas,
+			:fairsharing_key_location => ENV['FAIRSHARING_KEY'],
+			:debug => false				 				 	 
+})
+
+if (!cgi.request_method or cgi.request_method == "GET") and !debug
+        puts "Content-type: application/openapi+yaml;version=3.0\n\n"
+        puts @swagger.getSwagger
+elsif cgi.request_method == "POST" or debug
+        input_json = JSON.parse(@input)
+        guid = input_json["subject"]
+        @swagger.testedGUID = guid
+        response = testGUID
+        puts "Content-type: application/json+ld\n\n"
+        puts response
+end
