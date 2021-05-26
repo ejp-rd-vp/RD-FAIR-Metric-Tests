@@ -1,12 +1,12 @@
 version: "3"
 services:
   tests: 
-    image: rdfairmetrics/fair_metric_tests:0.0.1
+    image: rdfairmetrics/fair_metric_tests:0.0.2
     container_name: rd-tests
     environment:
-      TEST_PROTOCOL: ${PROTOCOL}
-      TEST_HOST: ${HOST} # from the perspective of the evaluator container!
-      TEST_PATH: ${PATH}     # becomes http://tests:8080/tests/blahbahblah
+      TEST_PROTOCOL: ${TESTPROTOCOL}
+      TEST_HOST: ${TESTHOST} # from the perspective of the evaluator container!
+      TEST_PATH: ${TESTPATH}     # becomes http://tests:8080/tests/blahbahblah
       FAIRSHARING_KEY: ${FAIRSHARING_KEY}
       BING_API: ${BING_API}
     ports:
