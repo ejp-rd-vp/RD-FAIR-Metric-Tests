@@ -8,7 +8,7 @@ require 'rdf/turtle'
 require 'sparql'
 
 debug = false
-VERSION = HARVESTER_VERSION + ":" + "RD-R1-Tst-0.0.1"
+VERSION = HARVESTER_VERSION + ":" + "RD-R1-Tst-0.0.3"
 
 
 def testGUID

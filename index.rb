@@ -1,7 +1,7 @@
-tests = Dir["./tests/gen2*"]
+tests = Dir["./tests/rd*"]
 
 puts "Content-type: text/html\n\n"
-puts "Current Tests (names must match '^gen2*')"
+puts "Current Tests (names must match '^rd*')"
 puts "<br/><br/>"
 tests.each do |t|
   name = t.gsub(/\.\/tests\//, "")
